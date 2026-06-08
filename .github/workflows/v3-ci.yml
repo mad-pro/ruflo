@@ -2322,6 +2322,13 @@ jobs:
           pnpm install --frozen-lockfile
           pnpm -r build
       - name: Run trajectory graph edges smoke
+        # #2312 — TEST 2's post-task chain (intelligence.recordTrajectory →
+        # @ruvector/ruvllm SonaCoordinator) blows past the default 4 GB heap.
+        # Bump the runner ceiling to 6 GB so CI can complete; the underlying
+        # ruvllm allocation profile is tracked separately and will fix the
+        # cause, not the symptom.
+        env:
+          NODE_OPTIONS: '--max-old-space-size=6144'
         run: node scripts/smoke-trajectory-graph-edges.mjs
 
   graph-plugin-adapter-smoke:
