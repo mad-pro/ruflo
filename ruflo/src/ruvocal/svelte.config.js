@@ -10,8 +10,13 @@ dotenv.config({ path: "./.env" });
 const useStatic = process.env.ADAPTER === "static";
 
 function getCurrentCommitSHA() {
+	const fromEnv = process.env.PUBLIC_COMMIT_SHA?.trim() || process.env.GIT_SHA?.trim();
+	if (fromEnv) {
+		return fromEnv;
+	}
+
 	try {
-		return execSync("git rev-parse HEAD").toString();
+		return execSync("git rev-parse HEAD").toString().trim();
 	} catch (error) {
 		console.error("Error getting current commit SHA:", error);
 		return "unknown";

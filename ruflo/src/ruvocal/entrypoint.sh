@@ -1,5 +1,10 @@
 ENV_LOCAL_PATH=/app/.env.local
 
+# EasyPanel and some hosts expose MONGO_URL instead of MONGODB_URL.
+if test -n "${MONGO_URL}" && test -z "${MONGODB_URL}" ; then
+    export MONGODB_URL="${MONGO_URL}"
+fi
+
 if test -z "${DOTENV_LOCAL}" ; then
     if ! test -f "${ENV_LOCAL_PATH}" ; then
         echo "DOTENV_LOCAL was not found in the ENV variables and .env.local is not set using a bind volume. Make sure to set environment variables properly. "

@@ -45,9 +45,28 @@ WORKDIR /app
 
 COPY --link --chown=1000 package-lock.json package.json ./
 
+# EasyPanel and other hosts pass runtime env as build-args; wire them through for vite/svelte-kit.
 ARG APP_BASE=
 ARG PUBLIC_APP_COLOR=
-ENV BODY_SIZE_LIMIT=15728640
+ARG PUBLIC_COMMIT_SHA=
+ARG GIT_SHA=
+ARG OPENAI_BASE_URL=
+ARG OPENAI_API_KEY=
+ARG MONGODB_URL=
+ARG MONGO_URL=
+# Avoid fetching live models during image build (postbuild analyse imports server code).
+ARG SKIP_MODEL_LOAD=true
+
+ENV BODY_SIZE_LIMIT=15728640 \
+    APP_BASE=${APP_BASE} \
+    PUBLIC_APP_COLOR=${PUBLIC_APP_COLOR} \
+    PUBLIC_COMMIT_SHA=${PUBLIC_COMMIT_SHA} \
+    GIT_SHA=${GIT_SHA} \
+    OPENAI_BASE_URL=${OPENAI_BASE_URL} \
+    OPENAI_API_KEY=${OPENAI_API_KEY} \
+    MONGODB_URL=${MONGODB_URL} \
+    MONGO_URL=${MONGO_URL} \
+    SKIP_MODEL_LOAD=${SKIP_MODEL_LOAD}
 
 RUN --mount=type=cache,target=/app/.npm \
     npm set cache /app/.npm && \
@@ -55,7 +74,7 @@ RUN --mount=type=cache,target=/app/.npm \
 
 COPY --link --chown=1000 . .
 
-RUN git config --global --add safe.directory /app && \
+RUN npx svelte-kit sync && \
     npm run build
 
 # mongo image

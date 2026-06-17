@@ -1,3 +1,4 @@
+import { building } from "$app/environment";
 import { config } from "$lib/server/config";
 import type { ChatTemplateInput } from "$lib/types/Template";
 import { z } from "zod";
@@ -491,7 +492,9 @@ const rebuildModels = async (): Promise<ModelsRefreshSummary> => {
 	return applyModelState(newModels, startedAt);
 };
 
-await rebuildModels();
+if (process.env.SKIP_MODEL_LOAD !== "true" && !building) {
+	await rebuildModels();
+}
 
 export const refreshModels = async (): Promise<ModelsRefreshSummary> => {
 	if (inflightRefresh) {
