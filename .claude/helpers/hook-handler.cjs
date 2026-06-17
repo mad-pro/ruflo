@@ -138,11 +138,28 @@ const handlers = {
     var dangerous = ['rm -rf /', 'format c:', 'del /s /q c:\\', ':(){:|:&};:'];
     for (var i = 0; i < dangerous.length; i++) {
       if (cmd.includes(dangerous[i])) {
-        console.error('[BLOCKED] Dangerous command detected: ' + dangerous[i]);
-        process.exit(1);
+        var reason = 'Dangerous command detected: ' + dangerous[i];
+        console.log(JSON.stringify({
+          permission: 'deny',
+          user_message: reason,
+          agent_message: reason,
+          hookSpecificOutput: {
+            hookEventName: 'PreToolUse',
+            permissionDecision: 'deny',
+            permissionDecisionReason: reason,
+          },
+        }));
+        process.exit(2);
       }
     }
-    console.log('[OK] Command validated');
+    // Cursor PreToolUse expects JSON on stdout; plain text breaks shell execution.
+    console.log(JSON.stringify({
+      permission: 'allow',
+      hookSpecificOutput: {
+        hookEventName: 'PreToolUse',
+        permissionDecision: 'allow',
+      },
+    }));
   },
 
   'post-edit': () => {
